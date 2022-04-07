@@ -1,8 +1,6 @@
-
-# import required libraries
 from dataclasses import dataclass
 import streamlit as st
-from datetime import datetime
+import datetime as datetime
 from dataclasses import dataclass
 from typing import Any, List
 import pandas as pd
@@ -17,42 +15,45 @@ from pathlib import Path
 from pinata import pin_file_to_ipfs, pin_json_to_ipfs, convert_data_to_json
 
 @dataclass
-class ServiceRecord:
-
-    technician_id: Any
-    vehicle_id: Any
-    event_id: Any
-
-@dataclass
 class Block:
-    record: ServiceRecord
-    service_date: str = datetime.utcnow().strftime('%H:%M:%S')
-    prev_hash: str = '0'
+    vehicle_vin: int
+    service_provider: Any
+    odometer: int
+    service_report: Any
+    prev_hash: str = "0"
+    timestamp: str = datetime.datetime.utcnow().strftime("%H:%M:%S")
 
     def hash_block(self):
         sha = hashlib.sha256()
 
-        service_date_encoded = self.service_date.encode()
-        sha.update(service_date_encoded)
+        vehicle_vin = str(self.vehicle_vin).encode()
+        sha.update(vehicle_vin)
 
-        record = str(self.record).encode()
+        service_provider = str(self.service_provider).encode()
+        sha.update(service_provider)
 
-        sha.update(record)
+        odometer = str(self.odometer).encode()
+        sha.update(odometer)
 
-        sha.update(self.prev_hash.encode())
+        service_report = str(self.service_report).encode()
+        sha.update(service_report)
 
+        timestamp = str(self.timestamp).encode()
+        sha.update(timestamp)
+
+        prev_hash = str(self.prev_hash).encode()
+        sha.update(prev_hash)
 
         return sha.hexdigest()
 
+# Create the data class PyChain
 
-##At this point^ my website run
 
 @dataclass
-class ServiceChain:
+class PyChain:
     chain: List[Block]
 
     def add_block(self, block):
-        print('new block added')
         self.chain += [block]
 
 
@@ -72,47 +73,41 @@ st.markdown('## ENTER SERVICE RECORDS BELOW')
 # allow to cache inputted data
 @st.cache(allow_output_mutation=True)
 def setup():
-    print("Start")
-    genisis_block = Block(
-        record= ServiceRecord(technician_id = 'Jiffy Lube', vehicle_id = 'honda civic', event_id='oil change' )
-    )
-
-    return ServiceChain([genisis_block])
+    print("Initializing Chain")
+    return PyChain([Block(vehicle_vin="", service_provider= "", odometer="", service_report="" )])
 
 
-servicechain_live = setup()
+pychain = setup()
 
-technician_id = st.text_input("Technician")
-vehicle_id = st.text_input('Vehicle Vin#')
-event_id = st.text_input('Service Record')
+
+input_service = st.text_input("Service Report")
+input_odometer_reading = st.text_input("Odometer Reading")
+input_service_tech = st.text_input("Service Technician")
+input_vehicle_vin = st.text_input("Vehicle Vin")
 #the review for how to create a website is under the second class with sub around minute 40
-if st.button('Add Service'):
-    prev_block = servicechain_live.chain[-1]
 
+if st.button("Input Log"):
+    prev_block = pychain.chain[-1]
+
+   
     prev_block_hash = prev_block.hash_block()
-
-    new_block = Block(
-        record=ServiceRecord(technician_id, vehicle_id, event_id),
-        prev_hash = prev_block_hash
-    )
-
-    servicechain_live.add_block(new_block)
-
+    new_block = Block(vehicle_vin= input_vehicle_vin, odometer=input_odometer_reading, service_provider=input_service_tech, service_report=input_service, prev_hash=prev_block_hash)
+    pychain.add_block(new_block)
 ##make it pretty and legible
-print(servicechain_live.chain)
-servicechain_df = pd.DataFrame(servicechain_live.chain).astype(str)
 
-st.write(servicechain_df)
+pychain_df = pd.DataFrame(pychain.chain)
+st.write(pychain_df)
+
+
 
 ## allow for service search
 
 st.sidebar.write('# Service Lookup')
 selected_block = st.sidebar.selectbox(
-    "Which service event do you want to look up?", servicechain_live.chain
+    "Which service event do you want to look up?", pychain.chain
 )
 
 st.sidebar.write(selected_block)
-
 
 ###########################################################
 ###########################################################
