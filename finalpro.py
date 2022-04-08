@@ -111,7 +111,7 @@ selected_block = st.sidebar.selectbox(
 st.sidebar.write(selected_block)
 
 
-###########################################################
+
 ######################################
 
 load_dotenv()
@@ -170,13 +170,7 @@ def pin_auto(auto_vin, auto_file):
     return json_ipfs_hash
 
 
-# def pin_registration_renewal(registration_renewal):
-#    json_report = convert_data_to_json(registration_renewal)
-#    registration_ipfs_hash = pin_json_to_ipfs(json_report)
-#    return registration_ipfs_hash
-
-
-st.title("AutoFax Registration System")
+st.title("BlockFax Registration System")
 st.write("Choose an account to get started")
 accounts = w3.eth.accounts
 address = st.selectbox("Select Account", options=accounts)
@@ -184,9 +178,7 @@ st.markdown("---")
 
 ################################################################################
 # Register New Vehicle Purchase
-################################################################################
-
-registered_vehicles = [""]    
+################################################################################ 
 
 auto_brands = ["", "Audi", "Bentley",  "BMW", "Cadillac", "Chevy", "Chrysler", "Dodge", "Ferrari", "Ford", "Honda", "Hyundai", "Jaguar", 
 "Jeep", "Kia", "Lamborghini", "Lexus", "Mazda", "Mercedes-Benz", "Nissan", "Porsche", "Subaru", "Tesla", "Toyota"]
@@ -215,8 +207,6 @@ if st.button("Register Purchase"):
     st.markdown(f"[Auto IPFS Gateway Link](https://ipfs.io/ipfs/{auto_ipfs_hash})")
     st.balloons()
 st.markdown("---")
-
-
 
 ###############################################################################################
 
